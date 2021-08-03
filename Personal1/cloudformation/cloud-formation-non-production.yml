@@ -1,0 +1,182 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  RpmS3Bucket:
+    Type: String
+    Description: RPM S3 bucket
+    Default: dwp-cloudservices-nolntc-deploy-dev
+  RpmS3Key:
+    Type: String
+    Description: RPM S3 key
+    Default: pipeline/noltf-1.0.104748-1.x86_64.rpm
+  TerraformStateFileS3Bucket:
+    Type: String
+    Description: Terraform state file S3 bucket
+    Default: dwp-nolntc-dev-terraform-states
+  TerraformLockTable:
+    Type: String
+    Description: Terraform Dynamo DB lock table
+    Default: tflock-test
+
+Resources:
+  HCSDeployerPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: HCSDeployerPolicy
+      Roles:
+        - HCSDeployerRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              # EC2 / SG
+            - 'ec2:DescribeKeyPairs'
+            - 'ec2:AuthorizeSecurityGroup*'
+            - 'ec2:RevokeSecurityGroup*'
+            - 'ec2:AuthorizeSecurityGroupIngress'
+            - 'ec2:*KeyPair*'
+            - 'ec2:CreateImage'
+            - 'ec2:CreateKeypair'
+            - 'ec2:DeleteKeyPair'
+            - 'ec2:CreateSecurityGroup'
+            - 'ec2:DeleteSecurityGroup'
+            - 'ec2:CreateSnapshot'
+            - 'ec2:CreateTags'
+            - 'ec2:CreateVolume'
+            - 'ec2:CreateDefaultSecurityGroup'
+            - 'ec2:CreateDefaultSubnet'
+            - 'ec2:Describe*'
+            - 'ec2:RunInstances'
+            - 'ec2:StopInstances'
+            - 'ec2:TerminateInstances'
+            - 'ec2:RevokeSecurityGroupEgress'
+            - 'ec2:AuthorizeSecurityGroupEgress'
+              # RDS
+            - 'rds:Describe*'
+            - 'rds:ListTagsForResource'
+            - 'rds:CreateDBSubnetGroup'
+            - 'rds:CreateDBInstance'
+              # ASG / AMI
+            - 'autoscaling:Describe*'
+            - 'autoscaling:CreateLaunchConfiguration'
+            - 'autoscaling:UpdateAutoScalingGroup'
+            - 'autoscaling:DeleteLaunchConfiguration'
+            - 'autoscaling:CreateAutoScalingGroup'
+            - 'autoscaling:PutScalingPolicy'
+            - 'autoscaling:AttachLoadBalancerTargetGroups'
+            - 'autoscaling:*MetricsCollection'
+            - 'autoscaling:DescribeMetricCollectionTypes'
+            - 'cloudwatch:PutMetricAlarm'
+            - 'cloudwatch:Describe*'
+            - 'ec2:CopyImage'
+            - 'ec2:DeleteSnapshot'
+            - 'ec2:DeregisterImage'
+            - 'ec2:DeleteVolume'
+              # Load Balancing
+            - 'elasticloadbalancing:Describe*'
+            - 'elasticloadbalancing:CreateTargetGroup'
+            - 'elasticloadbalancing:CreateLoadBalancer'
+            - 'elasticloadbalancing:ModifyTargetGroup'
+            - 'elasticloadbalancing:ModifyLoadBalancerAttributes'
+            - 'elasticloadbalancing:ModifyTargetGroupAttributes'
+            - 'elasticloadbalancing:CreateListener'
+              # Route 53
+            - 'route53:List*'
+            - 'route53:Get*'
+            - 'route53:ChangeResourceRecordSets'
+              # SSM
+            - 'ssm:GetParameter'
+            - 'ssm:PutParameter'
+              # IAM
+            - 'iam:Get*'
+            - 'iam:PassRole'
+            - 'iam:CreateRole'
+            - 'iam:CreatePolicy'
+            - 'iam:GetInstanceProfile'
+            - 'iam:PassRole'
+            - 'iam:CreateInstanceProfile'
+            - 'iam:AddRoleToInstanceProfile'
+            - 'iam:GetRole'
+            - 'iam:*RolePolicy'
+            - 'iam:GetPolicy'
+            - 'iam:GetPolicyVersion'
+            - 'iam:GetUser'
+            - 'iam:*UserPolicy'
+            - 'iam:ListEntitiesForPolicy'
+            - 'iam:ListAccessKeys'
+            - 'iam:ListPolicyVersions'
+            - 'iam:DeleteUserPolicy'
+            - 'iam:DeleteAccessKey'
+            - 'iam:CreatePolicyVersion'
+            - 'iam:ListGroupsForUser'
+            - 'iam:DeleteUser'
+            - 'iam:Attach*'
+            - 'iam:ListRolePolicies'
+              # Cloudwatch
+            - 'cloudwatch:GetMetricData'
+            - 'cloudwatch:PutMetricAlarm'
+            - 'cloudwatch:Describe*'
+            - 'logs:Describe*'
+            - 'logs:List*'
+            - 'logs:PutMetricFilter'
+            - 'logs:DeleteMetricFilter'
+            - 'logs:DeleteRetentionPolicy'
+            - 'logs:PutRetentionPolicy'
+            - 'logs:CreateLog*'
+            - 'logs:DeleteLog*'
+              # S3
+            - 's3:PutObject'
+            - 's3:GetObject'
+            - 's3:*'
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - 's3:GetObject'
+            Resource:
+              !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref RpmS3Bucket
+                  - '/'
+                  - !Ref RpmS3Key
+          - Effect: Allow
+            Action:
+            - 's3:GetObject'
+            - 's3:PutObject'
+            Resource:
+              !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref TerraformStateFileS3Bucket
+                  - '/*'
+          - Effect: Allow
+            Action:
+            - 's3:ListObjects'
+            - 's3:ListBucket'
+            Resource:
+              !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref TerraformStateFileS3Bucket
+          - Effect: Allow
+            Action:
+            - 'dynamodb:PutItem'
+            - 'dynamodb:DeleteItem'
+            - 'dynamodb:GetItem'
+            Resource:
+              !Join
+                - ''
+                - - 'arn:aws:dynamodb:eu-west-2:*:table/'
+                  - !Ref TerraformLockTable
+          - Effect: Allow
+            Action:
+              - 'kms:CreateGrant'
+              - 'kms:Decrypt'
+              - 'kms:Describe*'
+              - 'kms:Encrypt'
+              - 'kms:GenerateDataKey*'
+              - 'kms:ReEncrypt*'
+              - 'kms:ListAliases*'
+            Resource:
+              - '*'

@@ -1,0 +1,86 @@
+---
+groups:
+- name: default
+  rules:
+  - alert: Disk_Space
+    expr: ( 1 - node_filesystem_free{job='node',fstype!='rootfs',mountpoint!~'/(run|var).*',mountpoint!=''} / node_filesystem_size{job='node'} ) > 0.80
+    labels:
+      severity: warning
+    annotations:
+      description: "WARNING: instance {{ $labels.instance }} disk 80% full"
+  - alert: Disk_Space
+    expr: ( 1 - node_filesystem_free{job='node',fstype!='rootfs',mountpoint!~'/(run|var).*',mountpoint!=''} / node_filesystem_size{job='node'} ) > 0.90
+    labels:
+      severity: critical
+    annotations:
+      description: "CRITICAL: instance {{ $labels.instance }} disk 90% full"
+  - alert: CPU_User
+    expr: rate(node_cpu{mode="user"}[5m]) > 0.85
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      description: "WARNING: instance {{ $labels.instance }} CPU user 85%"
+  - alert: CPU_User
+    expr: rate(node_cpu{mode="user"}[5m]) > 0.95
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      description: "CRITICAL: instance {{ $labels.instance }} CPU user 95%"
+  - alert: CPU_System
+    expr: rate(node_cpu{mode="system"}[5m]) > 0.85
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      description: "WARNING: instance {{ $labels.instance }} CPU system 85%"
+  - alert: CPU_System
+    expr: rate(node_cpu{mode="system"}[5m]) > 0.95
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      description: "CRITICAL: instance {{ $labels.instance }} CPU system 95%"
+  - alert: Memory_Used
+    expr: ( 1 - node_memory_MemAvailable / node_memory_MemTotal ) > 0.85
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      description: "WARNING: instance {{ $labels.instance }} memory 85%"
+  - alert: Memory_Used
+    expr: ( 1 - node_memory_MemAvailable / node_memory_MemTotal ) > 0.95
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      description: "CRITICAL: instance {{ $labels.instance }} memory 95%"
+  - alert: Swap_Used
+    expr: ((node_memory_SwapTotal-node_memory_SwapFree)/node_memory_SwapTotal) > 0.85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      description: "WARNING: instance {{ $labels.instance }} swap 85%"
+  - alert: Swap_Used
+    expr: ((node_memory_SwapTotal-node_memory_SwapFree)/node_memory_SwapTotal) > 0.95
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      description: "CRITICAL: instance {{ $labels.instance }} swap 95%"
+  - alert: Processes_Runnable
+    expr: node_procs_running > 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      description: "WARNING: instance {{ $labels.instance }} node procs > 10"
+  - alert: Processes_Runnable
+    expr: node_procs_running > 20
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      description: "CRITICAL: instance {{ $labels.instance }} node procs > 20"

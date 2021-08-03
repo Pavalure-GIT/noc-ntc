@@ -1,0 +1,11 @@
+# Assume role
+# If provided with a role ARN, Terraform will attempt to assume this role using the supplied credentials.
+
+
+
+provider "aws" {
+  assume_role {
+    role_arn     = "arn:aws:iam::${account_id}:role/ROLE_NAME"
+  }
+  region     = "eu-west-2"
+}

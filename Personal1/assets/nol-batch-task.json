@@ -1,0 +1,95 @@
+ [
+    {
+      "dnsSearchDomains": null,
+      "entryPoint": null,
+      "portMappings": [
+        {
+          "hostPort": 8445,
+          "protocol": "tcp",
+          "containerPort": 8443
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "NOL_BATCH_${env}",
+          "awslogs-region": "eu-west-2",
+          "awslogs-stream-prefix": "NOL_BATCH_${env}"
+        }
+      },
+      "command": null,
+      "linuxParameters": null,
+      "cpu": 512,
+      "environment": [
+        {
+          "name": "SPRING_PROFILES_ACTIVE",
+          "value": "${spring_profile_active}"
+        }
+      ], 
+      "secrets": [  
+
+        {
+          "name": "NOTIFICATION_DB_PURGE_SCHEDULE",
+          "valueFrom": "/NOLNTC/NOL/${env}/NOTIFICATION_DB_PURGE_SCHEDULE"
+        },
+        {
+          "name": "NOTIFICATION_DB_RETENTION",
+          "valueFrom": "/NOLNTC/NOL/${env}/NOTIFICATION_DB_RETENTION"
+        },
+        {
+          "name": "NOTIFICATION_FILE_PURGE_SCHEDULE",
+          "valueFrom": "/NOLNTC/NOL/${env}/NOTIFICATION_FILE_PURGE_SCHEDULE"
+        },
+        {
+          "name": "NOTIFICATION_FILE_RETENTION",
+          "valueFrom": "/NOLNTC/NOL/${env}/NOTIFICATION_FILE_RETENTION"
+        },
+        {
+          "name": "NOTIFICATION_IMPORT_SCHEDULE",
+          "valueFrom": "/NOLNTC/NOL/${env}/NOTIFICATION_IMPORT_SCHEDULE"
+        },
+        {
+          "name": "DBURL",
+          "valueFrom": "/NOLNTC/NOL/${env}/BATCH_DBURL"
+        },
+        {
+          "name": "DBUSER",
+          "valueFrom": "/NOLNTC/NOL/${env}/DBUSER"
+        },
+        {
+          "name": "DBPASS",
+          "valueFrom": "/NOLNTC/NOL/${env}/rds_password"
+        },
+        {
+          "name": "PGCRYPTO_KEY",
+          "valueFrom": "/NOLNTC/NOL/${env}/PGCRYPTO_KEY"
+        }
+      ],
+      "ulimits": null,
+      "dnsServers": null,
+	    "mountPoints": [
+                {
+                    "sourceVolume": "fileshare",
+                    "containerPath": "/data",
+                    "readOnly": false
+                }
+          ],
+      "workingDirectory": null,
+      "dockerSecurityOptions": null,
+      "memory": 2048,
+      "memoryReservation": null,
+      "volumesFrom": [],
+      "image": "${account_id}.dkr.ecr.eu-west-2.amazonaws.com/nol-batch:${nol_batch_version}",
+      "disableNetworking": null,
+      "healthCheck": null,
+      "essential": true,
+      "links": null,
+      "hostname": null,
+      "extraHosts": null,
+      "user": null,
+      "readonlyRootFilesystem": null,
+      "dockerLabels": null,
+      "privileged": null,
+      "name": "nol-batch-container"
+    }
+  ]

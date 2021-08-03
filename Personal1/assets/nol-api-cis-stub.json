@@ -1,0 +1,31 @@
+[
+  {
+    "cpu": 512,
+    "environment": [
+      
+    ],
+    "essential": true,
+    "image": "${account_id}.dkr.ecr.eu-west-2.amazonaws.com/nol-api-cis-stub:integration",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "NOL_CIS_API",
+        "awslogs-region": "eu-west-2",
+        "awslogs-stream-prefix": "NOL_CIS_API"
+      }
+    },
+    "memory": 1024,
+    "mountPoints": [
+      
+    ],
+    "name": "nol-api-cis-stub-container",
+    "portMappings": [
+      {
+        "containerPort": 8080,
+        "hostPort": 8098,
+        "protocol": "tcp"
+      }
+    ],
+    "volumesFrom": []
+  }
+]

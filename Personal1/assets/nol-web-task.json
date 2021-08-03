@@ -1,0 +1,85 @@
+[
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "NOL_WEB_APP_${env}",
+          "awslogs-region": "eu-west-2",
+          "awslogs-stream-prefix": "NOL_WEB_APP_${env}"
+      }
+    },
+      "portMappings": [
+        {
+          "hostPort": 8443,
+          "protocol": "tcp",
+          "containerPort": 8443
+        }
+      ],
+      "cpu": 1024,
+      "secrets": [
+          {
+            "name": "CIS_CERT_OUID",
+            "valueFrom": "/NOLNTC/NOL/${env}/CIS_CERT_OUID"
+          },
+          {
+            "name": "CIS_KEYSTORE_FILENAME",
+            "valueFrom": "/NOLNTC/NOL/${env}/CIS_KEYSTORE_FILENAME"
+          },
+          {
+            "name": "CIS_SWIMLANE_ID",
+            "valueFrom": "/NOLNTC/NOL/${env}/CIS_SWIMLANE_ID"
+          },
+          {
+            "name": "CIS_SYS_ID",
+            "valueFrom": "/NOLNTC/NOL/${env}/CIS_SYS_ID"
+          },
+          {
+            "name": "CIS_TRUSTSTORE_FILENAME",
+            "valueFrom": "/NOLNTC/NOL/${env}/CIS_TRUSTSTORE_FILENAME"
+          },
+          {
+            "name": "DBURL",
+            "valueFrom": "/NOLNTC/NOL/${env}/DBURL"
+          },
+          {
+            "name": "DBUSER",
+            "valueFrom": "/NOLNTC/NOL/${env}/DBUSER"
+          },
+          {
+            "name": "DBPASS",
+            "valueFrom": "/NOLNTC/NOL/${env}/rds_password"
+          },
+          {
+            "name": "PGCRYPTO_KEY",
+            "valueFrom": "/NOLNTC/NOL/${env}/PGCRYPTO_KEY"
+          },
+          {
+            "name": "CIS_TRUSTSTORE_PASS",
+            "valueFrom": "/NOLNTC/NOL/${env}/CIS_TRUSTSTORE_PASS"
+          },
+          {
+            "name": "CIS_KEYSTORE_PASS",
+            "valueFrom": "/NOLNTC/NOL/${env}/CIS_KEYSTORE_PASS"
+          },
+          {
+            "name": "SQUID_PROXY",
+            "valueFrom": "/NOLNTC/NOL/${env}/SQUIDPROXYIP"
+          },
+          {
+            "name": "APIENDPOINT",
+            "valueFrom": "/NOLNTC/NOL/${env}/APIENDPOINT"
+          },
+          {
+            "name": "DISABLE_CIS_VALIDATION",
+            "valueFrom": "/NOLNTC/NOL/${env}/DISABLE_CIS_VALIDATION"
+          }
+
+      ],
+      "mountPoints": [],
+      "memory": 1024,
+      "volumesFrom": [],
+      "image": "${account_id}.dkr.ecr.eu-west-2.amazonaws.com/nol-web:${nol_web_version}",
+      "essential": true,
+      "name": "nol-web-container"
+    }
+  ]

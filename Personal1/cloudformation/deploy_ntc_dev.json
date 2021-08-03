@@ -1,0 +1,8 @@
+{
+    "environment": "dev",
+    "rpm_location": "s3://dwp-cloudservices-nolntc-deploy-stage/pipeline/noltf-1.0.104051-1.x86_64.rpm",
+    "script_name": "/noltf/bin/deploy_ntc.sh",
+    "variables": "ENVIRONMENT=dev,RUNTYPE=plan"
+}
+
+

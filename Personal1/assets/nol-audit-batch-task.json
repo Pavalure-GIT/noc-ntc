@@ -1,0 +1,85 @@
+[
+    {
+      "dnsSearchDomains": null,
+      "entryPoint": null,
+      "portMappings": [
+        {
+          "hostPort": 8446,
+          "protocol": "tcp",
+          "containerPort": 8443
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "NOL_AUDIT_BATCH_${env}",
+          "awslogs-region": "eu-west-2",
+          "awslogs-stream-prefix": "NOL_AUDIT_BATCH_${env}"
+      }
+    },
+      "command": null,
+      "linuxParameters": null,
+      "cpu": 512,
+      "environment": [
+        {
+          "name": "SPRING_PROFILES_ACTIVE",
+          "value": "int"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "FILE_PURGE_RETENTION",
+          "valueFrom": "/NOLNTC/NOL/${env}/NOL_AUDIT_FILE_RETENTION"
+        },
+        {
+          "name": "FILE_PURGE_SCHEDULE",
+          "valueFrom": "/NOLNTC/NOL/${env}/NOL_AUDIT_FILE_PURGE_SCHEDULE"
+        },
+        {
+          "name": "AUDIT_SCHEDULE",
+          "valueFrom": "/NOLNTC/NOL/${env}/NOL_AUDIT_SCHEDULE"
+        },
+        {
+          "name": "DBURL",
+          "valueFrom": "/NOLNTC/NOL/${env}/AUDIT_DBURL"
+        },
+        {
+          "name": "DBUSER",
+          "valueFrom": "/NOLNTC/NOL/${env}/DBUSER"
+        },
+        {
+          "name": "DBPASS",
+          "valueFrom": "/NOLNTC/NOL/${env}/rds_password"
+        }
+
+      ],
+      
+      "ulimits": null,
+      "dnsServers": null,
+	    "mountPoints": [
+                {
+                    "sourceVolume": "fileshare",
+                    "containerPath": "/opt/localmount/audit",
+                    "readOnly": false
+                }
+          ],
+      "workingDirectory": null,
+      "dockerSecurityOptions": null,
+      "memory": 1024,
+      "memoryReservation": null,
+      "volumesFrom": [],
+      "image": "${account_id}.dkr.ecr.eu-west-2.amazonaws.com/nol-audit-batch:${nol_audit_batch_version}",
+      "disableNetworking": null,
+      "healthCheck": null,
+      "essential": true,
+      "links": null,
+      "hostname": null,
+      "extraHosts": null,
+      "user": null,
+      "readonlyRootFilesystem": null,
+      "dockerLabels": null,
+      "privileged": null,
+      "name": "nol-audit-batch-container"
+    }
+	
+  ]

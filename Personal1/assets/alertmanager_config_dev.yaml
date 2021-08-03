@@ -1,0 +1,33 @@
+{% extends "alertmanager.yaml.j2" %}
+
+{% block route_block %}
+# Routing
+route:
+  group_by: ['alertname', 'instance']
+  group_wait: 30s
+  group_interval: 30s
+  repeat_interval: 3h
+  receiver: receiver
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+{% endblock %}
+
+{% block receivers_block %}
+# Receivers
+receivers:
+  - name: receiver
+    email_configs:
+    - to: 'joe.quinn@dxc.com' # DEV EMAIL ADDRESS LIST
+      send_resolved: true
+      headers:
+        subject: '{% raw %}{{ range .Alerts }}{{ .Annotations.description }}{{ end }}{% endraw %}'
+    slack_configs:
+    - send_resolved: true
+      api_url: 'dwpdigital.slack.com' # DEV SLACKURL
+      channel: '#nol-ntc-support' # DEV SLACKCHANNEL
+      text: "{% raw %}{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}{% endraw %}" # https://github.com/prometheus/alertmanager/issues/307
+{% endblock %}

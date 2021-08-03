@@ -1,0 +1,15 @@
+{
+  "Version": "2012-10-17",
+  "Id": "Policy1429136655940",
+  "Statement": [
+    {
+      "Sid": "Stmt1429136633762",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::652711504416:root"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${service_s3_bucket}/elb/*"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+#!/bin/bash
+
+
+# Disable Selinux
+sudo setenforce 0
+
+# Set firewalld rules
+sudo chmod 777 /etc/sysctl.conf
+echo 'net.ipv4.conf.all.route_localnet = 1' >> /etc/sysctl.conf
+sudo sysctl -p /etc/sysctl.conf
+
+firewall-cmd --permanent  --add-service=nfs
+firewall-cmd --permanent  --add-service=mountd
+firewall-cmd --permanent --add-service=rpc-bind
+
+firewall-cmd --permanent --add-port=22/tcp
+firewall-cmd --permanent --add-port=3128/tcp
+firewall-cmd --permanent --add-port=80/tcp
+
+firewall-cmd --reload
+
+# Disable Selinux
+sudo setenforce 1
+
+
+#proxy config start
+
+export PROXY_PORT=3128
+export AWS_DEFAULT_REGION=eu-west-2
+export ECS_CLUSTER=nol-ecs-cluster-${tf_workspace_name}
+export http_proxy=http://${PROXY_HOST}:$PROXY_PORT
+export https_proxy=http://${PROXY_HOST}:$PROXY_PORT
+export HTTP_PROXY=http://${PROXY_HOST}:$PROXY_PORT
+export HTTPS_PROXY=http://${PROXY_HOST}:$PROXY_PORT
+export no_proxy=169.254.169.254
+chmod 777 /etc/yum.conf
+echo "proxy=http://${PROXY_HOST}:$PROXY_PORT" >> /etc/yum.conf
+
+#proxy config end
+
+sudo yum install nano -y
+sudo yum install nfs-utils -y
+
+touch /tmp/nfsnollog.txt
+chmod 777 /tmp/nfsnollog.txt
+echo setting NOLNTC environment to NOL > /tmp/nfsnollog.txt
+NOLNTC_ENV=nol
+echo creating nfs share /opt/nfs$NOLNTC_ENV >> /tmp/nfsnollog.txt
+mkdir -p /opt/nfs$NOLNTC_ENV
+sudo chown nfsnobody:nfsnobody /opt/nfs$NOLNTC_ENV
+sudo chmod -R 777 /opt/nfs$NOLNTC_ENV   
+echo creating notification inbound folder >> /tmp/nfsnollog.txt  
+mkdir -p /opt/nfs$NOLNTC_ENV/notification/in 
+echo creating audit folder >> /tmp/nfsnollog.txt  
+mkdir -p /opt/nfs$NOLNTC_ENV/audit
+echo resetting permissions on nfs share /opt/nfs$NOLNTC_ENV  >> /tmp/nfsnollog.txt
+sudo chmod -R 777 /opt/nfs$NOLNTC_ENV 
+sudo chmod 777 /etc/exports 
+
+echo Setting up permission in /etc/exports ie root_squash >> /tmp/nfsnollog.txt
+echo '/opt/nfsnol 0.0.0.0/0.0.0.0(rw,root_squash,async)' > /etc/exports
+exportfs -a 
+
+# start nfs services at boot time
+
+sudo systemctl enable rpcbind
+sudo systemctl enable nfs-server
+sudo systemctl enable nfs-lock
+sudo systemctl enable nfs-idmap
+sudo systemctl start rpcbind
+sudo systemctl start nfs-server
+sudo systemctl start nfs-lock
+sudo systemctl start nfs-idmap
+
+sudo systemctl restart nfs-server
+
+
+
+sudo service rpcbind --full-restart 
+sudo service nfs --full-restart
+echo userdata startup script completed >> /tmp/nfsnollog.txt

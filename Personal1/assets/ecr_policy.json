@@ -1,0 +1,19 @@
+{
+    "Statement": [
+      {
+        "Action": [
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer"
+        ],
+        "Principal": {
+          "AWS": [
+            "arn:aws:iam::${nonproduction_account_id}:root",
+            "arn:aws:iam::${production_account_id}:root"
+          ]
+        },
+        "Effect": "Allow",
+        "Sid": "Allow access to images from Non Production and Production Accounts"
+      }
+    ],
+    "Version": "2008-10-17"
+  }

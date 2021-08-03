@@ -1,0 +1,89 @@
+{% extends "prometheus.yaml.j2" %}
+{% block scrape_configs %}
+scrape_configs:
+  - job_name: node
+    ec2_sd_configs:
+      - region: eu-west-2
+        port: 9100
+    relabel_configs:
+      - source_labels: [__meta_ec2_tag_Costcode]
+        regex: '10389675'
+        action: keep
+      - source_labels: [__meta_ec2_tag_Name]
+        target_label: name
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance
+      - source_labels: [__meta_ec2_tag_Environment]
+        target_label: env
+      - source_labels: [__meta_ec2_tag_Application]
+        target_label: service_name
+  - job_name: cloudwatch
+    scrape_interval: 60s
+    static_configs:
+      - targets:
+        - localhost:9106
+  - job_name: pushgateway
+    honor_labels: true
+    ec2_sd_configs:
+      - region: eu-west-2
+        port: 9091
+    relabel_configs:
+      - source_labels: [__meta_ec2_tag_Role]
+        regex: prometheus
+        action: keep
+      - source_labels: [__meta_ec2_tag_Environment]
+        target_label: env
+      - source_labels: [__meta_ec2_tag_Application]
+        target_label: service_name
+  - job_name: blackbox_http
+    metrics_path: /probe
+    params:
+        module: [http_2xx]
+    static_configs:
+    - targets:
+      - https://www.google.com/
+      - https://www.bbc.co.uk/does-not-exist
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: 127.0.0.1:9115  # The blackbox exporter's real hostname:port.
+  - job_name: blackbox_icmp
+    metrics_path: /probe
+    params:
+        module: [icmp]
+    static_configs:
+    - targets:
+      - www.google.com
+      - www.bbc.co.uk
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: 127.0.0.1:9115  # The blackbox exporter's real hostname:port.
+{% endblock %}
+{% block alerting_block %}
+alerting:
+  alertmanagers:
+    - scheme: http
+      ec2_sd_configs:
+        - region: {{ aws_region }}
+          port: 9093
+      relabel_configs:
+        - source_labels: [__meta_ec2_tag_Name]
+          regex: monitoring.*
+          action: keep
+    - scheme: https
+      basic_auth:
+        username: {{ lookup('aws_ssm', '/monitor/prod/hcs-alertmanager/username', decrypt=True, region='eu-west-2' ) }}
+        password: {{ lookup('aws_ssm', '/monitor/prod/hcs-alertmanager/password', decrypt=True, region='eu-west-2' ) }}
+      static_configs:
+        - targets:
+            - alertmanager-eu-west-2a.service.dwpcloud.uk:9093
+            - alertmanager-eu-west-2b.service.dwpcloud.uk:9093
+{% endblock %}
+
